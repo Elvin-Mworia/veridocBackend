@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start":"node index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "ardrive-core-js": "^2.0.2",
@@ -16,8 +16,9 @@
     "dotenv": "^16.4.2",
     "express": "^4.18.2",
     "warp-contracts": "^1.4.34",
-    "weavedb-sdk": "^0.39.1"
-  }, 
+    "weavedb-sdk": "^0.39.1",
+    "weavedb-sdk-node": "^0.39.1"
+  },
   "devDependencies": {
     "nodemon": "^3.0.3"
   },
