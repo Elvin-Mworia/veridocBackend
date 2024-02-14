@@ -1,3 +1,5 @@
 node_modules
 .env
 wallet.json
+cache
+cache/warp
