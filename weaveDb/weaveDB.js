@@ -8,14 +8,23 @@ const walletFilePath = path.join(__dirname,'/wallet.json');
 
 //reading wallet
 const wallet = readJWKFile(walletFilePath);
+let db;
 
-const setupWeaveDB = async () => {
-    const db = new WeaveDB({
-      contractTxId:contractTxId,
-    });
-    await db.init();
-    //setting the wallet as the default signer for write calls
+async function setupWeaveDB() {
+   db = new WeaveDB({ contractTxId: contractTxId });
+    await db.init(); // Initialize the database
+    // Setting the wallet as the default signer for write calls
     db.setDefaultWallet(wallet.jwk, "ar");
-    return(db);
-  }
-module.exports=setupWeaveDB;
+}
+
+// Validating if the Id of a folder is in the collection
+async function getFolder(id) {
+    if (!db) {
+        await setupWeaveDB(); // Ensure the database is initialized
+    }
+    let result = await db.get("Folders", ["Id"], ["Id", "==", id]);
+    return result;
+}
+
+
+module.exports={getFolder};
