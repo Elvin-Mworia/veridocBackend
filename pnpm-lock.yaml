@@ -23,6 +23,9 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
+  uuid:
+    specifier: ^9.0.1
+    version: 9.0.1
   warp-contracts:
     specifier: ^1.4.34
     version: 1.4.36
@@ -11013,6 +11016,7 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    requiresBuild: true
     dev: false
 
   /write-file-atomic@2.4.3:
