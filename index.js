@@ -3,6 +3,8 @@ require("dotenv").config();
 const app=express();
 const cors=require('cors');
 const uploadFile=require("./routes/uploadFile");
+const addCourtStaion=require("./routes/addStation");
+
 
 const logger=(req,res,next)=>{
     console.log("incoming request");
@@ -21,6 +23,7 @@ app.use(logger);
 const port=process.env.PORT;
 //routes
 app.use("/upload",uploadFile);
+app.use("/addStation",addCourtStaion);
 
 app.listen(port,()=>{
         console.log(`running on port ${port}`);
