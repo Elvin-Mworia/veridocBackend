@@ -39,9 +39,9 @@ async function addFolder(id,name,stationId,parentId,){
 }
 
 //add court station
-async function addStation(name,stationId){
+async function addStation(name){
     checkDb();
-    let result = await db.set({stationId:stationId,name:name},"station",stationId);
+    let result = await db.set({stationId:uuid(),name:name},"station",stationId);
 
     return result;
  }
