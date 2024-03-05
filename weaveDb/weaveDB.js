@@ -39,7 +39,7 @@ async function addStation(name){
 
 //add a registry
 async function addRegistry(stationId){
-    let result = await db.set({stationId:stationId,walletAddress:[""]},"station",stationId);
+    let result = await db.set({stationId:stationId,walletAddresses:[]},"registry",stationId);
     return result;
 }
  
