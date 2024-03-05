@@ -140,9 +140,9 @@ async function approval(status,caseId){
 }
 
 //check a station in the station schema
-async function getStation(stationId){
+async function getStation(name){
     checkDb();
-    let result = await db.get("station", ["stationId"], ["stationId", "==", stationId]);
+    let result = await db.get("station", ["name"], ["name", "==", name]);
     return result;
 }
 
