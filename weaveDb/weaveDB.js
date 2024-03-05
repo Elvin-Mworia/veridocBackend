@@ -18,15 +18,15 @@ async function setupWeaveDB() {
 }
 setupWeaveDB();
 
-// Validating if the Id of a folder is in the collection
-async function getFolder(id) {
-    let result = await db.get("Folders", ["Id"], ["Id", "==", id]);
+// Validating if the name of a folder is in the collection
+async function getFolder(name) {
+    let result = await db.get("Folders", ["name"], ["name", "==", name]);
     return result;
 }
 
 //add a folder
 async function addFolder(id,name,stationId,parentId,){
-    let result=db.add({Id:id,name:name,stationId:stationId,parentId:parentId},"Folders")
+    let result=db.set({Id:id,name:name,stationId:stationId,parentId:parentId},"Folders",stationId)
     return result;
 }
 
@@ -79,9 +79,9 @@ async function getCases(stationId){
     return result;
 }
 
-//get User by their wallet address
-async function getUser(walletAddress){
-    let result= await db.get("users", ["walletAddress"], ["walletAddress", "==", walletAddress]);
+//get User by their wallet address,schema can be admin,staff or users
+async function getUser(walletAddress,schema){
+    let result= await db.get(schema, ["walletAddress"], ["walletAddress", "==", walletAddress]);
     return result;
 }
 
