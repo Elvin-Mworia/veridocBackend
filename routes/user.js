@@ -105,8 +105,34 @@ router.post("/l0",async (req,res)=>{
  }catch (error) {
         console.log("Error:", error);
         return res.status(500).json({ message: "Internal server error" });
-    }
-    
+    } 
 })
+
+//removing an admin and lowering their priveledges to staff level
+router.post("/removeAdmin",async (req,res)=>{
+    let walletAddress=req.body.walletAddress;
+    
+    try{
+     const admin=await getUser(walletAddress,"admins");
+     if(admin.length==0){
+        return res.status(404).json({message:`The user with wallet ${walletAddress} is not an admin.`})
+     }
+     await removeAdmin(walletAddress);
+      
+     await modifyRole(walletAddress,"staff");
+     
+     //check role if updated
+     const role=await checkRole(walletAddress,"staff");
+    
+     if(role[0].role==="admin"){
+         return res.status(400).json({ message: "Role has not been updated" });
+     }
+    
+     return res.status(200).json({ message: `User with the wallet address ${walletAddress} has been removed as an admin!` });
+    }catch (error) {
+        console.log("Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+    })
 
 module.exports=router;
