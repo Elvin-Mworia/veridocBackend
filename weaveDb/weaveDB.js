@@ -55,9 +55,9 @@ async function addAdmin(name,walletAddress){
     return result;
 }
 
-//modify the role of a staff to an admin
-async function addRole(walletAddress){
-    let result= await db.update({role:"admin"},"staff",walletAddress);
+//modify the role of a staff to an admin or vice versa
+async function modifyRole(walletAddress,role){
+    let result= await db.update({role:role},"staff",walletAddress);
     return result;
 }
 
@@ -121,4 +121,4 @@ async function getStation(name){
     return result;
 }
 
-module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,addRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,approval,getStation};
+module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,approval,getStation};
