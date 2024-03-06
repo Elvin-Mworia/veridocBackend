@@ -18,15 +18,15 @@ async function setupWeaveDB() {
 }
 setupWeaveDB();
 
-// Validating if the Id of a folder is in the collection
-async function getFolder(id) {
-    let result = await db.get("Folders", ["Id"], ["Id", "==", id]);
+// Validating if the name of a folder is in the collection
+async function getFolder(name) {
+    let result = await db.get("Folders", ["name"], ["name", "==", name]);
     return result;
 }
 
 //add a folder
 async function addFolder(id,name,stationId,parentId,){
-    let result=db.add({Id:id,name:name,stationId:stationId,parentId:parentId},"Folders")
+    let result=db.set({Id:id,name:name,stationId:stationId,parentId:parentId},"Folders",stationId)
     return result;
 }
 
@@ -44,8 +44,8 @@ async function addRegistry(stationId){
 }
  
 //add a user to user schema
-async function addUser(name,walletAddress,email,role,phone){
-   let result=await db.set({name:name,walletAddress:walletAddress,email:email,role:role,phone:phone},"users",walletAddress);
+async function addUser(walletAddress,name,email,role,phone){
+  let result=await db.set({walletAddress:walletAddress,name:name,email:email,role:role,phone:phone},"users",walletAddress);
     return result;
 }
 
@@ -62,15 +62,15 @@ async function addRole(walletAddress){
 }
 
 //check role
-async function checkRole(walletAddress){
-    let result=await db.get("users", ["walletAddress"], ["walletAddress", "==", walletAddress]);
+async function checkRole(walletAddress,schema){
+    let result=await db.get(schema, ["walletAddress"], ["walletAddress", "==", walletAddress]);
     return result;
 }
 
 //remove admin from the admin schema
 async function removeAdmin(walletAddress){
   let result=await db.delete("admins",walletAddress)
-
+  return result;
 }
 
 //get cases by station id from the cases schema
@@ -79,21 +79,21 @@ async function getCases(stationId){
     return result;
 }
 
-//get User by their wallet address
-async function getUser(walletAddress){
-    let result= await db.get("users", ["walletAddress"], ["walletAddress", "==", walletAddress]);
+//get User by their wallet address,schema can be admin,staff or users
+async function getUser(walletAddress,schema){
+    let result= await db.get(schema, ["walletAddress"], ["walletAddress", "==", walletAddress]);
     return result;
 }
 
 //add wallet address to the list of addresses belonging to a station in the registry schema
 async function addWalletAddress(stationId,walletAddress){
-    let result=await db.update({walletAddresses:[...walletAddress]},"registry",stationId)
-
+    let result=await db.update({walletAddresses:walletAddress},"registry",stationId)
+    return result;
 }
 
 //add staff to the staff schema
-async function addStaff(name,walletAddress,email,stationId,role){
-    let result=await db.set({name:name,walletAddress:walletAddress,email:email,role:role,stationId:stationId},"staff",walletAddress);
+async function addStaff(name,walletAddress,email,station,role){
+    let result=await db.set({name:name,walletAddress:walletAddress,email:email,role:role,station:station},"staff",walletAddress);
     return result;
 }
 
@@ -105,7 +105,6 @@ async function returnWalletAddress(stationId){
 
 //add a case to the case schema
 async function addCase(txId,walletAddress,applicant,respodent,stationId){
-  
     let result=await db.set({caseId:uuid(),txId:txId,txOrigin:walletAddress,applicant:applicant,date:db.ts(),status:"pending",respodent:respodent,stationId:stationId},"cases",caseId)
     return result;
 }
