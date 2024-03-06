@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,addRole,checkRole}=require("../weaveDb/weaveDB.js")
+const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole}=require("../weaveDb/weaveDB.js")
 
 //addin a unpriviledged user
 router.post("/l2", async (req, res) => {
@@ -93,7 +93,7 @@ router.post("/l0",async (req,res)=>{
         return res.status(400).json({ message: "Something went wrong" });
     }
     //update role
-    await addRole(walletAddress);
+    await modifyRole(walletAddress,"admin");
     //check role if updated
     const role=await checkRole(walletAddress,"admins");
 
