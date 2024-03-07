@@ -7,11 +7,12 @@ const walletFilePath = path.join(__dirname,'/wallet.json');
 
 //initializing ardrive with wallet
 const myWallet = readJWKFile(walletFilePath);
-
-const arDrive=()=>{
+function setupArdrive(){
     const myWallet = readJWKFile(walletFilePath);
     return  arDriveFactory({wallet:myWallet})
 }
 
+module.exports={setupArdrive};
 
-module.exports=arDrive;
+
+
