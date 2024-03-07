@@ -74,8 +74,8 @@ async function removeAdmin(walletAddress){
 }
 
 //get cases by station id from the cases schema
-async function getCases(stationId){
-    let result= await db.get("cases", ["stationId"], ["stationId", "==", stationId]);
+async function getCases(key,value){
+    let result= await db.get("cases",[key],[key, "==", value]);
     return result;
 }
 
