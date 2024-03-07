@@ -2,7 +2,7 @@ const { EID,wrapFileOrFolder }=require('ardrive-core-js');
 const {setupArdrive}=require("../ardrive/ardrive.js")
 const express=require("express");
 const router=express.Router();
-const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder}=require("../weaveDb/weaveDB.js")
+const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval}=require("../weaveDb/weaveDB.js")
 const {upload}=require("./uploadFile.js");
 const path=require("path");
 const { setTimeout }=require("timers/promises");
@@ -57,6 +57,29 @@ router.post("/add",async(req,res)=>{
         console.log("Error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
+})
+
+router.post("/approval",async (req,res)=>{
+let caseId=req.body.caseId;
+let status=req.body.status
+
+try{
+   let caseFile=await getCases("caseId",caseId);
+   if(caseFile.length==0){
+    return res.status(400).json({message:`No file with the id ${caseId}`})
+   }
+
+   await approval(status,caseId);
+   caseFile=await getCases("caseId",caseId);
+   if(caseFile[0].status!==status){
+    return res.status(400).json({message:"Failed to update the status of the case"});
+   }
+   
+   return res.status(200).json({ message: `status of file with case id ${caseId}  updated` });
+}catch(error){
+    console.log("Error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+}
 })
 
 module.exports=router;
