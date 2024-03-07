@@ -106,6 +106,9 @@ router.get("/getpendingfiles",async (req,res)=>{
       //filter out the ones that have status as pending
       let pendingFiles=casesOfStation.filter((file)=>file.status==="pending")
       console.log(pendingFiles);
+      if(pendingFiles.length==0){
+        return res.status(200).json({message:'There are currently no pending cases'})
+      }
       return  res.status(200).json({message:pendingFiles});
     }catch(error){
         console.log("Error:", error);
