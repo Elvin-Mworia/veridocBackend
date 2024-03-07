@@ -83,4 +83,34 @@ try{
 }
 })
 
+//get pending files associated with a station
+router.get("/getpendingfiles",async (req,res)=>{
+    const station=req.body.station;
+    const walletAddress=req.body.walletAddress;
+
+    try{
+    
+      let stationInfo=await getStation(station);
+      if(stationInfo.length==0){
+        return res.status(400).json({message:`No court  station with name ${station}`})
+      }
+      let walletAddresses=await returnWalletAddress(stationInfo[0].stationId)
+      if (!walletAddresses[0].walletAddresses.includes(walletAddress)) {
+        return res.status(401).json({message:"Not authorized"})
+      }
+      console.log(stationInfo[0].stationId);
+      casesOfStation=await getCases("stationId",stationInfo[0].stationId)
+      if(casesOfStation.length==0){
+        return res.status(200).json({messages:"Station has no cases"})
+      }
+      //filter out the ones that have status as pending
+      let pendingFiles=casesOfStation.filter((file)=>file.status==="pending")
+      console.log(pendingFiles);
+      return  res.status(200).json({message:pendingFiles});
+    }catch(error){
+        console.log("Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+})
+
 module.exports=router;
