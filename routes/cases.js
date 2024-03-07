@@ -23,7 +23,8 @@ router.post("/add",async(req,res)=>{
       if(folder.length==0){
         return res.status(404).json({message:"Enter a valid court station"})
       }
-      const stationId=folder[0].stationId;
+      let stationInfo=await getStation(station);
+      const stationId=stationInfo[0].stationId;
       const destFolderId= EID(folder[0].Id)
       const filePath = path.join(__dirname,'files',walletAddress.concat(".epub"));
     
