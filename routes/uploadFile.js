@@ -1,25 +1,26 @@
-const express=require("express");
-const router=express.Router();
-const {arDrive}=require("../ardrive/ardrive");
-const {getFolder}=require("../weaveDb/weaveDB.js")
-
-
-//check if the folder exists in the database first
-router.get("/folderId",async (req,res,next)=>{
-    let folderId=req.body.Id;
-    let data;
-    getFolder(folderId).then(result=>{
-       data=result;
-     }).then(()=>{
-        if (!data){
-            res.status(400).json({message:"no folder with the id was found"});
-        }
-        res.status(200).json(data[0]);
-        next();
-    }).catch(err=>{
-        console.error(err);
-    })
-      
+const multer=require('multer');
+const path=require("path");
+const storage=multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,path.resolve(__dirname,'./files' ));
+    },
+    filename:(req,file,cb)=>{
+        cb(null,req.body.walletAddress+path.extname(file.originalname));
+    }
+    
 })
+const upload=multer({
+    storage:storage,
+    limits:{fileSize:"50000000"},
+    fileFilter:(req,file,cb)=>{
+        const fileTypes=/pdf|webp|docx|epub/
+        const mimtype=fileTypes.test(file.mimetype)
+        const extname=fileTypes.test(path.extname(file.originalname))
+       if(mimtype && extname ){
+           return cb(null,true)
+       }  
+       cb('give the proper file formats to upload') 
+    }
+}).single("file")
 
-module.exports=router;
+module.exports=upload;
