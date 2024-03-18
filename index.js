@@ -2,7 +2,7 @@ const express=require('express');
 require("dotenv").config();
 const app=express();
 const cors=require('cors');
-const addCourtStaion=require("./routes/station");
+const courtStation=require("./routes/station");
 const users=require("./routes/user");
 const folder=require("./routes/addFolder")
 const cases=require("./routes/cases")
@@ -25,7 +25,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(logger);
 const port=process.env.PORT;
 //routes
-app.use("/station",addCourtStaion);
+app.use("/station",courtStation);
 app.use("/users",users);
 app.use("/folders",folder);
 app.use("/cases",upload,cases);
