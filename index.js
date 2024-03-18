@@ -14,8 +14,9 @@ const logger=(req,res,next)=>{
  }
 const Allowed_origin=['*'];
  
-var corOption={
-    origin:Allowed_origin
+const corOption ={
+    origin:'http://localhost:3000', 
+    credentials:true,            //access-control-allow-credentials:true
 }
 
 app.use(cors(corOption));
