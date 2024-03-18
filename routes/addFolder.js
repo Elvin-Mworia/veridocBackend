@@ -9,7 +9,7 @@ router.post("/addFolder",async (req,res,next)=>{
   let parentId=process.env.PARENTID;
   let id=process.env.FOLDERID;
   
-  getStation(name).then((result)=>{
+  getStation("name",name).then((result)=>{
     if(!result.length){
       res.status(400).json({message:"You can not add a folder which is not a court station"})
       return

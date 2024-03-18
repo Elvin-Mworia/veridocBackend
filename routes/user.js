@@ -44,7 +44,7 @@ router.post("/l1", async (req, res) => {
         }
 
         // Get station
-        const result = await getStation(station);
+        const result = await getStation("name",station);
         if (result.length === 0) {
             console.log("Station not found");
             return res.status(404).json({ message: "Station not found" });
