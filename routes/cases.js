@@ -17,13 +17,13 @@ router.post("/add",async(req,res)=>{
     let respodent=[req.body.respodent];
     let caseId=uuid();
     let arDrive=setupArdrive();
-   
+
     try{
       const folder=await getFolder(station);
       if(folder.length==0){
         return res.status(404).json({message:"Enter a valid court station"})
       }
-      let stationInfo=await getStation(station);
+      let stationInfo=await getStation("name",station);
       const stationId=stationInfo[0].stationId;
       const destFolderId= EID(folder[0].Id)
       const filePath = path.join(__dirname,'files',walletAddress.concat(".epub"));
@@ -36,7 +36,7 @@ router.post("/add",async(req,res)=>{
 //     entitiesToUpload: [{ wrappedEntity, destFolderId }],
 //     customMeteData:{
 //     metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
-//     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent]}
+//     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
 // }
 // });
 //console.log(uploadFileResult);
@@ -90,7 +90,7 @@ router.get("/getpendingfiles",async (req,res)=>{
 
     try{
     
-      let stationInfo=await getStation(station);
+      let stationInfo=await getStation("name",station);
       if(stationInfo.length==0){
         return res.status(400).json({message:`No court  station with name ${station}`})
       }
@@ -114,6 +114,21 @@ router.get("/getpendingfiles",async (req,res)=>{
         console.log("Error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
+})
+
+//cases belonging to a user
+router.post("/casesForUser",async (req,res)=>{
+let walletAddress=req.body.walletAddress;
+try{
+  let cases=await getCases("walletAddress",walletAddress)
+  if(cases.length==0){
+    return res.status(200).json({message:cases,case:'No cases filed'})
+  }
+  return  res.status(200).json({message:cases});
+}catch(error){
+    console.log("Error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+}
 })
 
 module.exports=router;
