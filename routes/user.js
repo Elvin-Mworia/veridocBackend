@@ -134,5 +134,26 @@ router.post("/removeAdmin",async (req,res)=>{
         return res.status(500).json({ message: "Internal server error" });
     }
     })
-
+//log in user by walletAddress
+router.post("/login", async (req, res) => {
+        let walletAddress = req.body.walletAddress;
+        console.log(walletAddress);
+ 
+         try {
+             // Get user
+             const result = await getUser(walletAddress, "users");
+             console.log(result)
+             if (result.length == 0) {
+                 console.log("status 400")
+                 return res.status(400).json({ message: "Login failed" });
+             }else{
+                 console.log(" status 200")
+                 return res.status(200).json({ message: "Login successful" });
+             }
+         } catch (error) {
+             console.log(error);
+             return res.status(500).json({ message: "Internal server error" });
+         }
+     });
+     
 module.exports=router;
