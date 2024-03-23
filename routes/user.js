@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole}=require("../weaveDb/weaveDB.js")
+const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole,removeAdmin,getAllDocs}=require("../weaveDb/weaveDB.js")
 
 //addin a unpriviledged user
 router.post("/l2", async (req, res) => {
@@ -142,18 +142,39 @@ router.post("/login", async (req, res) => {
          try {
              // Get user
              const result = await getUser(walletAddress, "users");
+             const staff= await getUser(walletAddress,"staff");
              console.log(result)
-             if (result.length == 0) {
+             console.log(staff)
+             if (result.length == 0 && staff.length==0) {
                  console.log("status 400")
                  return res.status(400).json({ message: "Login failed" });
              }else{
                  console.log(" status 200")
-                 return res.status(200).json({ message: "Login successful" });
+                 if (result.length>0){
+                 return res.status(200).json({ message: "Login successful" ,role:result[0].role});
+                 }
+                 if (staff.length>0){
+                    return res.status(200).json({ message: "Login successful" ,role:staff[0].role});
+                    }
              }
          } catch (error) {
              console.log(error);
              return res.status(500).json({ message: "Internal server error" });
          }
      });
-     
+
+//get all Admins
+router.get("/getAllAdmins",async (req,res)=>{
+    
+    try{
+       let admins=await getAllDocs("admins");
+       if(admins.length==0){
+          return res.status(200).json({message:"No admins",admins}) 
+       }
+       return res.status(200).json({message:"successfully fetched admins",admins});
+    }catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+})
 module.exports=router;
