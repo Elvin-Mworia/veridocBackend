@@ -121,4 +121,10 @@ async function getStation(key,value){
     return result;
 }
 
-module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,approval,getStation};
+//return all the document of a collection
+async function getAllDocs(schema){
+    let result=await db.get(schema);
+    return result;
+}
+
+module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,approval,getStation,getAllDocs};
