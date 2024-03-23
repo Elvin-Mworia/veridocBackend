@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const {addStation,getStation,addRegistry}=require("../weaveDb/weaveDB.js")
+const {addStation,getStation,addRegistry,getAllDocs}=require("../weaveDb/weaveDB.js")
 
 router.post("/addStation",async (req,res,next)=>{
     let name=req.body.name;
@@ -33,6 +33,20 @@ router.post("/getStation",async (req,res)=>{
        }
        let name=station[0].name;
        return res.status(200).json({message:name});
+    }catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+})
+//get all folders
+router.get("/getAllStationFolders",async (req,res)=>{
+    
+    try{
+       let folders=await getAllDocs("Folders");
+       if(folders.length==0){
+          return res.status(400).json({message:"No folders",folders}) 
+       }
+       return res.status(200).json({message:"successfuly fetched folders",folders});
     }catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal server error" });
