@@ -4,7 +4,7 @@ const app=express();
 const cors=require('cors');
 const courtStation=require("./routes/station");
 const users=require("./routes/user");
-const folder=require("./routes/addFolder")
+const folder=require("./routes/folders")
 const cases=require("./routes/cases")
 const upload=require("./routes/uploadFile");
 

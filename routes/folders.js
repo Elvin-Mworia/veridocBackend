@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const {arDrive}=require("../ardrive/ardrive");
+const {arDrive}=require("../ardrive/ardrive.js");
 const {addFolder,getStation, getFolder}=require("../weaveDb/weaveDB.js")
 
 //takes in name parameter from the req
@@ -8,7 +8,7 @@ router.post("/addFolder",async (req,res,next)=>{
   let name=req.body.name;
   let parentId=process.env.PARENTID;
   let id=process.env.FOLDERID;
-  
+  console.log(name);
   getStation("name",name).then((result)=>{
     if(!result.length){
       res.status(400).json({message:"You can not add a folder which is not a court station"})
@@ -34,4 +34,5 @@ router.post("/addFolder",async (req,res,next)=>{
     next()
   })
 
+  
 module.exports=router
