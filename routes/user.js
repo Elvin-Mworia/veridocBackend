@@ -154,7 +154,7 @@ router.post("/login", async (req, res) => {
                  return res.status(200).json({ message: "Login successful" ,role:result[0].role});
                  }
                  if (staff.length>0){
-                    return res.status(200).json({ message: "Login successful" ,role:staff[0].role});
+                    return res.status(200).json({ message: "Login successful" ,role:staff[0].role,station:staff[0].station});
                     }
              }
          } catch (error) {
