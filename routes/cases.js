@@ -84,7 +84,7 @@ try{
 })
 
 //get pending files associated with a station
-router.get("/getpendingfiles",async (req,res)=>{
+router.post("/getpendingfiles",async (req,res)=>{
     const station=req.body.station;
     const walletAddress=req.body.walletAddress;
 
