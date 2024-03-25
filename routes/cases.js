@@ -2,7 +2,7 @@ const { EID,wrapFileOrFolder }=require('ardrive-core-js');
 const {setupArdrive}=require("../ardrive/ardrive.js")
 const express=require("express");
 const router=express.Router();
-const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval}=require("../weaveDb/weaveDB.js")
+const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval,subsequentUploads,getSubsequentFile}=require("../weaveDb/weaveDB.js")
 const {upload}=require("./uploadFile.js");
 const path=require("path");
 const { setTimeout }=require("timers/promises");
@@ -58,6 +58,62 @@ router.post("/add",async(req,res)=>{
         console.log("Error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
+})
+
+//uploads a subsequent file
+router.post("/uploadsubsequentfile",async(req,res)=>{
+  let walletAddress=req.body.walletAddress;
+  let station=req.body.station;
+  let filetype=req.body.filetype;
+  let caseId=req.body.caseId;
+  let arDrive=setupArdrive();
+
+  try{
+    const casefile=await getCases("caseId",caseId)
+    if(casefile.length==0){
+      return res.status(400).json({messages:`No such case in the records with case id ${caseId}`})
+    }
+    const folder=await getFolder(station);
+    if(folder.length==0){
+      return res.status(404).json({message:"Enter a valid court station"})
+    }
+
+    let stationInfo=await getStation("name",station);
+    const stationId=stationInfo[0].stationId;
+    const destFolderId= EID(folder[0].Id)
+    const filePath = path.join(__dirname,'files',walletAddress.concat(".epub"));
+  
+     // Wrap file for upload
+    const wrappedEntity = wrapFileOrFolder(filePath);   
+
+// Upload a public file to destination folder
+// const uploadFileResult = await arDrive.uploadAllEntities({
+//     entitiesToUpload: [{ wrappedEntity, destFolderId }],
+//     customMeteData:{
+//     metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
+//     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
+// }
+// });
+//console.log(uploadFileResult);
+      let txId=uuid()
+      let date=String(Date.now());
+      let metadata=[casefile[0].walletAddress,date,txId,filetype,caseId];
+      //console.log(caseId,txId,metadata,walletAddress,filetype,date,stationId);
+      await subsequentUploads(caseId,txId,metadata,walletAddress,filetype,date,stationId);
+      const uploadedCase=await getSubsequentFile("date",date);
+      if (uploadedCase.length==0){
+          return res.status(400).json({message:`Subsequent file for the with caseId:${caseId} was not recorded`})
+      }
+
+      await setTimeout(2000);
+      deleteFile(filePath);
+      return res.status(200).json({ message: "recorded successfully" });
+      
+  }
+  catch (error) {
+      console.log("Error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
 })
 
 router.post("/approval",async (req,res)=>{
