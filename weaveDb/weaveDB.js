@@ -108,7 +108,16 @@ async function addCase(caseId,txId,walletAddress,metadata,applicant,respodent,da
     let result=await db.set({caseId:caseId,txId:txId,walletAddress:walletAddress,metadata:[...metadata],applicant:[...applicant],date:date,status:"pending",respodent:[...respodent],stationId:stationId},"cases",caseId)
     return result;
 }
-
+//uploading subsequent files
+async function subsequentUploads(caseId,txId,walletAddress,filetype,date,stationId){
+    let result=await db.set({caseId:caseId,txId:txId,walletAddress:walletAddress,filetype:filetype,date:date,stationId:stationId},"subsequentuploads",caseId)
+    return result;
+}
+//get the subsequent file uploaded either by registry staff or individual
+async function getSubsequentFile(key,value){
+    let result= await db.get("subsequentuploads",[key],[key, "==", value]);
+    return result;
+}
 //approve or reject a case filling due missing details or wrong fomart
 async function approval(status,caseId){
     let result=await db.update({status:status},"cases",caseId);
@@ -127,4 +136,4 @@ async function getAllDocs(schema){
     return result;
 }
 
-module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,approval,getStation,getAllDocs};
+module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,subsequentUploads,getSubsequentFile,approval,getStation,getAllDocs};
