@@ -110,7 +110,7 @@ async function addCase(caseId,txId,walletAddress,metadata,applicant,respodent,da
 }
 //uploading subsequent files
 async function subsequentUploads(caseId,txId,metadata,walletAddress,filetype,date,stationId){
-    let result=await db.set({caseId:caseId,txId:txId,metadata:[...metadata],walletAddress:walletAddress,filetype:filetype,date:date,stationId:stationId},"subsequentuploads",caseId)
+    let result=await db.set({caseId:caseId,txId:txId,metadata:[...metadata],walletAddress:walletAddress,filetype:filetype,date:date,stationId:stationId},"subsequentuploads",date)
     return result;
 }
 //get the subsequent file uploaded either by registry staff or individual
