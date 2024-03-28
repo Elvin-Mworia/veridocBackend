@@ -104,8 +104,8 @@ async function returnWalletAddress(stationId){
 }
 
 //add a case to the case schema
-async function addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,stationId){
-    let result=await db.set({caseId:caseId,txId:txId,walletAddress:walletAddress,metadata:[...metadata],applicant:[...applicant],date:date,status:"pending",respodent:[...respodent],stationId:stationId},"cases",caseId)
+async function addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,courtName,stationId){
+    let result=await db.set({caseId:caseId,txId:txId,walletAddress:walletAddress,metadata:[...metadata],applicant:[...applicant],date:date,status:"pending",respodent:[...respodent],courtName:courtName,stationId:stationId},"cases",caseId)
     return result;
 }
 //uploading subsequent files

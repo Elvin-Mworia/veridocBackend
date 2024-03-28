@@ -43,7 +43,7 @@ router.post("/add",async(req,res)=>{
         let txId=uuid()
         let metadata=[caseId,walletAddress,station,applicant,respodent];
         let date=String(Date.now());
-        await addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,stationId);
+        await addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,station,stationId);
         const uploadedCase=await getCases("caseId",caseId);
         if (uploadedCase.length==0){
             return res.status(400).json({message:`Case for the walletaddress:${walletAddress} with caseId:${caseId} was not recorded in the cases schema`})
