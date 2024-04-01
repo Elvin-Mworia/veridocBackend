@@ -187,4 +187,20 @@ try{
 }
 })
 
+//getting a case
+router.post("/getCase",async (req,res)=>{
+  let caseId=req.body.caseId;
+  try{
+    let cases=await getCases("caseId",caseId)
+    if(cases.length==0){
+      return res.status(404).json({message:cases,case:'case not found'})
+    }   
+    console.log(cases[0]);
+    return  res.status(200).json({message:cases[0]});
+  }catch(error){
+      console.log("Error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
+  })
+
 module.exports=router;
