@@ -31,7 +31,7 @@ router.post("/add",async(req,res)=>{
        // Wrap file for upload
       const wrappedEntity = wrapFileOrFolder(filePath);   
 
-// Upload a public file to destination folder
+// Upload a public file to destination fo  status: 'pending',lder
 // const uploadFileResult = await arDrive.uploadAllEntities({
 //     entitiesToUpload: [{ wrappedEntity, destFolderId }],
 //     customMeteData:{
@@ -190,6 +190,7 @@ try{
 //getting a case
 router.post("/getCase",async (req,res)=>{
   let caseId=req.body.caseId;
+  console.log(caseId);
   try{
     let cases=await getCases("caseId",caseId)
     if(cases.length==0){
@@ -202,5 +203,22 @@ router.post("/getCase",async (req,res)=>{
       return res.status(500).json({ message: "Internal server error" });
   }
   })
+  
+  //get the subsequent files belonging to a case
+  router.post("/getSubsequentFile",async (req,res)=>{
+    let caseId=req.body.caseId;
+    console.log(caseId);
+    try{
+      let cases=await getSubsequentFile("caseId",caseId)
+      if(cases.length==0){
+        return res.status(200).json({message:cases,case:'No subsequent cases uploaded'})
+      }   
+      console.log(cases);
+      return  res.status(200).json({message:cases});
+    }catch(error){
+        console.log("Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+    })
 
 module.exports=router;
