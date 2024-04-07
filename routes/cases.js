@@ -11,13 +11,21 @@ const { v4: uuid } = require('uuid');
 
 //adding a case
 router.post("/add",async(req,res)=>{
+    let applicantlist=[];
+    let respodentlist=[];
+    for (const applicant of req.body.applicant ){
+      applicantlist.push(applicant.name)
+    }
+    for (const respodent of req.body.respodent ){
+      respodentlist.push(respodent.name);
+    }
     let walletAddress=req.body.walletAddress;
     let station=req.body.station;
-    let applicant=[req.body.applicant];
-    let respodent=[req.body.respodent];
+    let applicant=applicantlist
+    let respodent=respodentlist;
     let caseId=uuid();
     let arDrive=setupArdrive();
-
+    console.log({walletAddress,station,applicant,respodent})
     try{
       const folder=await getFolder(station);
       if(folder.length==0){
