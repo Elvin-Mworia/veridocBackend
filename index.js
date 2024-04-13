@@ -7,6 +7,7 @@ const users=require("./routes/user");
 const folder=require("./routes/folders")
 const cases=require("./routes/cases")
 const upload=require("./routes/uploadFile");
+const mpesa=require("./routes/mpesa")
 
 const logger=(req,res,next)=>{
     console.log("incoming request");
@@ -29,6 +30,7 @@ app.use("/station",courtStation);
 app.use("/users",users);
 app.use("/folders",folder);
 app.use("/cases",upload,cases);
+app.use("/mpesa-online",mpesa);
 
 app.listen(port,()=>{
         console.log(`running on port ${port}`);
