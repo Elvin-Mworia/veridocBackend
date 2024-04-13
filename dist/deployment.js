@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { LoggerFactory, WarpFactory } from 'warp-contracts';
-import ArLocal from 'arlocal';
+//import ArLocal from 'arlocal';
 //const DeployPlugin=require("warp-contracts-plugin-deploy");
-import { DeployPlugin } from 'warp-contracts-plugin-deploy';
+import { DeployPlugin ,ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 (async () => {
 //  let arLocal = new ArLocal(1985, false);
@@ -18,27 +18,44 @@ console.log(__dirname);
 
     // Set up Warp client
     LoggerFactory.INST.logLevel('error');
-    const warp = WarpFactory.forMainnet().use(new DeployPlugin());
-
-    let wallet;
+ //   const warp = WarpFactory.forMainnet().use(new DeployPlugin());
+    const warp = WarpFactory.forTestnet().use(new DeployPlugin());
+   
     // note: warp.testing.generateWallet() automatically adds funds to the wallet
-    //({ jwk: wallet } = await warp.generateWallet());
-    const jwk = await warp.arweave.wallets.generate();
-   const walletAddress = await warp.arweave.wallets.jwkToAddress(jwk);
-
+   const jwk  = await warp.generateWallet();
+   //console.log(jwk)
+   const wallet=jwk.jwk;
+   console.log(wallet);
+   //const jwk = await warp.arweave.wallets.generate();
+////   const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8'));
+ //  const walletAddress = await warp.arweave.wallets.jwkToAddress(jwk);
+ const walletAddress = jwk.address;
+//console.log(wallet)
+console.log(walletAddress)
     // Deploying contract
     console.log(__dirname);
-    const contractSrc = fs.readFileSync(path.join(__dirname, '/contract.js'),'utf8');
-    const initialState = fs.readFileSync(path.join(__dirname, '/initial-state.json'),'utf8');
-    const { contractTxId } = await warp.createContract.deploy({
-      jwk,
-      initState: initialState,
+ //   const contractSrc = fs.readFileSync(path.join(__dirname, '/../dist/contract.js'),{encoding:'utf8'});
+ //   const initialState = fs.readFileSync(path.join(__dirname, '/../dist/initial-state.json'),{encoding:'utf8'});
+    const contractSrc = fs.readFileSync("/home/nebula/Documents/4.2/Project/vericodeBackend/dist/contract.js",{encoding:'utf8'});
+    const stateFromFile = fs.readFileSync("/home/nebula/Documents/4.2/Project/vericodeBackend/dist/initial-state.json",{encoding:'utf8'});
+    const initialState = {
+      uploads:[],
+      ...{
+        owner: walletAddress,
+        canEvolve:true
+      },
+    };
+  
+    const { contractTxId } = await warp.deploy({
+      wallet:new ArweaveSigner(wallet),
+      initState:JSON.stringify(initialState),
       src: contractSrc,
     });
     // note: we need to mine block in ArLocal - so that contract deployment transaction was mined.
    // await warp.testing.mineBlock();
 
     // Interacting with the contract
+    console.log("contractid:"+contractTxId)
     const contract = warp.contract(contractTxId).setEvaluationOptions({ allowBigInt: true }).connect(wallet);
 
     // Read state
@@ -59,9 +76,13 @@ console.log(__dirname);
     const stateAfterInteraction = await contract.readState();
     console.log('State after 1 interaction');
     console.dir(stateAfterInteraction.cachedValue.state, { depth: null });
-  } finally {
+  } catch(e){
+    console.log(e)
+
+  }finally {
     // Shutting down ArLocal
   //  await arLocal.stop();
-  console.log("something went wrong \n")
+
+  //console.log("something went wrong \n")
   }
 })();
