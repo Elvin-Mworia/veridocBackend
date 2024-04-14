@@ -1,4 +1,6 @@
-import {  WarpFactory } from 'warp-contracts';
+const {  WarpFactory }=require('warp-contracts');
+const fs = require('fs');
+const path = require('path');
 const warp = WarpFactory.forTestnet();
 const contractTxId="cG0eo7OGb0XGN3VuyjOmrs2BIUDxiUMFD8br3b2pyFo";
 const walletFilePath = path.join(__dirname,'/contractwallet.json');
