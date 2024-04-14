@@ -135,5 +135,21 @@ async function getAllDocs(schema){
     let result=await db.get(schema);
     return result;
 }
+//add the filename(walletaddress+timestamp) for file upload
+async function addFilename(walletAddress,fileName){
+    let result=await db.set({fileName:fileName,walletAddress:walletAddress,timestamp:Date.now()},"filenames+timestamps",fileName);
+    return result;
+}
+//fetchs the filename(walletaddress+timestamp) for file upload
+async function getFilename(key,value){
+    let result= await db.get("filenames+timestamps",[key],[key, "==", value],["timestamp","desc"]);
+    return result;
+}
+//deletes the filename(walletaddress+timestamp) afterfile upload
+async function removeFilename(fileName){
+    let result=await db.delete("filenames+timestamps",fileName)
+    return result;
+  }
+  
 
-module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,subsequentUploads,getSubsequentFile,approval,getStation,getAllDocs};
+module.exports={getFolder,addStation,addFolder,addStation,addRegistry,addUser,addAdmin,modifyRole,checkRole,removeAdmin,getCases,getUser,addWalletAddress,addStaff,returnWalletAddress,addCase,subsequentUploads,getSubsequentFile,approval,getStation,getAllDocs,getFilename,addFilename,removeFilename};
