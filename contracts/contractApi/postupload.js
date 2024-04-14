@@ -12,4 +12,4 @@ async function postUpload(walletAddress,txId){
     await contract.writeInteraction({ function: 'postUpload',walletAddress:walletAddress,txId:txId });
     return
 }
-module.exports=postUpload;
+module.exports={postUpload};
