@@ -2,7 +2,7 @@ const { EID,wrapFileOrFolder }=require('ardrive-core-js');
 const {setupArdrive}=require("../ardrive/ardrive.js")
 const express=require("express");
 const router=express.Router();
-const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval,subsequentUploads,getSubsequentFile}=require("../weaveDb/weaveDB.js")
+const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval,subsequentUploads,getSubsequentFile,getFilename,removeFilename}=require("../weaveDb/weaveDB.js")
 const {upload}=require("./uploadFile.js");
 const path=require("path");
 const { setTimeout }=require("timers/promises");
@@ -34,21 +34,27 @@ router.post("/add",async(req,res)=>{
       let stationInfo=await getStation("name",station);
       const stationId=stationInfo[0].stationId;
       const destFolderId= EID(folder[0].Id)
-      const filePath = path.join(__dirname,'files',walletAddress.concat(".epub"));
-    
+      let file=await getFilename("walletAddress",walletAddress)
+      console.log(file[0].fileName)//fetches the name of the unique file
+      let filePath = path.join(__dirname,'files',file[0].fileName.concat(".epub"));
+      console.log(filePath)
        // Wrap file for upload
       const wrappedEntity = wrapFileOrFolder(filePath);   
 
 // Upload a public file to destination fo  status: 'pending',lder
-// const uploadFileResult = await arDrive.uploadAllEntities({
-//     entitiesToUpload: [{ wrappedEntity, destFolderId }],
-//     customMeteData:{
-//     metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
-//     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
-// }
-// });
+const uploadFileResult = await arDrive.uploadAllEntities({
+    entitiesToUpload: [{ wrappedEntity, destFolderId }],
+    customMetaData:{
+    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
+    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[...applicant], ['respodent']: [...respodent],['Content-Type']:['application/epub+zip']}
+}
+});
 //console.log(uploadFileResult);
-        let txId=uuid()
+console.log(uploadFileResult.created[0].dataTxId.transactionId)
+// console.log(uploadFileResult.created[0].metadataTxId)
+/console.log(uploadFileResult.created[0].bundledIn)
+//let txDataId=uploadFileResult.created[0].dataTxId
+        let txId=uploadFileResult.created[0].dataTxId.transactionId;
         let metadata=[caseId,walletAddress,station,applicant,respodent];
         let date=String(Date.now());
         await addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,station,stationId);
@@ -59,11 +65,13 @@ router.post("/add",async(req,res)=>{
 
         await setTimeout(2000);
         deleteFile(filePath);
+      //  removeFilename(file[0].fileName);
         return res.status(200).json({ message: "run successfully" });
         
     }
     catch (error) {
         console.log("Error:", error);
+       // removeFilename(file[0].fileName);
         return res.status(500).json({ message: "Internal server error" });
     }
 })
@@ -94,15 +102,15 @@ router.post("/uploadsubsequentfile",async(req,res)=>{
      // Wrap file for upload
     const wrappedEntity = wrapFileOrFolder(filePath);   
 
-// Upload a public file to destination folder
-// const uploadFileResult = await arDrive.uploadAllEntities({
-//     entitiesToUpload: [{ wrappedEntity, destFolderId }],
-//     customMeteData:{
-//     metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
-//     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
-// }
-// });
-//console.log(uploadFileResult);
+//Upload a public file to destination folder
+const uploadFileResult = await arDrive.uploadAllEntities({
+    entitiesToUpload: [{ wrappedEntity, destFolderId }],
+    customMeteData:{
+    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
+    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
+}
+});
+console.log(uploadFileResult);
       let txId=uuid()
       let date=String(Date.now());
       let metadata=[casefile[0].walletAddress,date,txId,filetype,caseId];
