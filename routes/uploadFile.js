@@ -1,11 +1,14 @@
 const multer=require('multer');
 const path=require("path");
+const {addFilename}=require("../weaveDb/weaveDB")
 const storage=multer.diskStorage({
     destination:(req,file,cb)=>{
         cb(null,path.resolve(__dirname,'./files' ));
     },
     filename:(req,file,cb)=>{
-        cb(null,req.body.walletAddress+path.extname(file.originalname));
+        let fileName=req.body.walletAddress.concat(Date.now());
+        addFilename(req.body.walletAddress,fileName);
+        cb(null,fileName+path.extname(file.originalname));
     }
     
 })
