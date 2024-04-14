@@ -14,4 +14,9 @@ async function postUpload(walletAddress,txId){
     await contract.writeInteraction({ function: 'postUpload',walletAddress:walletAddress,txId:txId });
     return
 }
-module.exports={postUpload};
+async function getContractState(){
+    const stateAfterInteraction = await contract.readState();
+    console.dir(stateAfterInteraction.cachedValue.state, { depth: null });
+    return stateAfterInteraction.cachedValue.state;
+}
+module.exports={postUpload,getContractState};
