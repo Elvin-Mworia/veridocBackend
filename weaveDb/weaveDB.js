@@ -142,7 +142,7 @@ async function addFilename(walletAddress,fileName){
 }
 //fetchs the filename(walletaddress+timestamp) for file upload
 async function getFilename(key,value){
-    let result= await db.get("filenames+timestamps",[key],[key, "==", value],["timestamp","desc"]);
+    let result= await db.get("filenames+timestamps",[key],[key, "==", value]);
     return result;
 }
 //deletes the filename(walletaddress+timestamp) afterfile upload

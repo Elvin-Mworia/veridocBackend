@@ -8,6 +8,14 @@ const path=require("path");
 const { setTimeout }=require("timers/promises");
 const {deleteFile}=require("./delete.js")
 const { v4: uuid } = require('uuid');
+const {postUpload}=require("../contracts/contractApi/postupload.js");
+
+function getYoungestObject(data) {
+  // 1. Sort the array in ascending order by timestamp
+  const sortedData = data.sort((a, b) => b.timestamp - a.timestamp);
+  // 2. Return the first element (youngest based on ascending sort)
+  return sortedData[0];
+}
 
 //adding a case
 router.post("/add",async(req,res)=>{
@@ -35,8 +43,17 @@ router.post("/add",async(req,res)=>{
       const stationId=stationInfo[0].stationId;
       const destFolderId= EID(folder[0].Id)
       let file=await getFilename("walletAddress",walletAddress)
+      let youngestObjectFileName;
+      if(file.length>1){
+        let youngestObject=getYoungestObject(file)
+        youngestObjectFileName=youngestObject.fileName;
+      }
+      if(file.length===1){
+        youngestObjectFileName=file[0].fileName
+      }
+      
       console.log(file[0].fileName)//fetches the name of the unique file
-      let filePath = path.join(__dirname,'files',file[0].fileName.concat(".epub"));
+      let filePath = path.join(__dirname,'files',youngestObjectFileName.concat(".epub"));
       console.log(filePath)
        // Wrap file for upload
       const wrappedEntity = wrapFileOrFolder(filePath);   
@@ -52,7 +69,9 @@ const uploadFileResult = await arDrive.uploadAllEntities({
 //console.log(uploadFileResult);
 console.log(uploadFileResult.created[0].dataTxId.transactionId)
 // console.log(uploadFileResult.created[0].metadataTxId)
-/console.log(uploadFileResult.created[0].bundledIn)
+let bundledIn=uploadFileResult.created[0].bundledIn.transactionId;
+console.log(bundledIn);
+await postUpload(walletAddress,bundledIn) //posting transanction details to smart contract
 //let txDataId=uploadFileResult.created[0].dataTxId
         let txId=uploadFileResult.created[0].dataTxId.transactionId;
         let metadata=[caseId,walletAddress,station,applicant,respodent];
