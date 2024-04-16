@@ -4,25 +4,24 @@ const {addStation,getStation,addRegistry,getAllDocs}=require("../weaveDb/weaveDB
 
 router.post("/addStation",async (req,res,next)=>{
     let name=req.body.name;
-    getStation("name",name).then(result=>{
-       console.log(result);
-       if(!result.length){
-           addStation(name).then((result)=>{
-               getStation(name,name).then(result=>{
-                console.log(result[0].stationId)
-                addRegistry(result[0].stationId);
-                res.status(200).json({message:`Successfully added the ${name} station`});
-               }).catch(err=>{
-                console.error(err)});
-            }).catch(err=>{
-               console.error(err);
-           })
-       }else{
-        res.status(400).json({message:"Court station exists"});
-       }  
-    })
-       next()
-   })
+
+    try{
+        let station=await getStation("name",name);
+        if(station.length>0){
+            return  res.status(400).json({message:"Court station exists"});
+        }
+        await addStation(name);
+        let newStation=await getStation("name",name)
+        if (newStation.length===0){
+          return res.status(400).json({message:`Court station with  the ${name} was not added `})
+        }
+        await addRegistry(newStation[0].stationId);
+    return res.status(200).json({message:`Successfully added the ${name} station`}); 
+    }catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+})
 
 router.post("/getStation",async (req,res)=>{
     let stationId=req.body.stationId;

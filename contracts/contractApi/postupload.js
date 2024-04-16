@@ -16,7 +16,7 @@ async function postUpload(walletAddress,txId){
 }
 async function getContractState(){
     const stateAfterInteraction = await contract.readState();
-    console.dir(stateAfterInteraction.cachedValue.state, { depth: null });
+    //console.dir(stateAfterInteraction.cachedValue.state, { depth: null });
     return stateAfterInteraction.cachedValue.state;
 }
 module.exports={postUpload,getContractState};

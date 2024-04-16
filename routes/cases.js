@@ -8,7 +8,7 @@ const path=require("path");
 const { setTimeout }=require("timers/promises");
 const {deleteFile}=require("./delete.js")
 const { v4: uuid } = require('uuid');
-const {postUpload}=require("../contracts/contractApi/postupload.js");
+const {postUpload,getContractState}=require("../contracts/contractApi/postupload.js");
 
 function getYoungestObject(data) {
   // 1. Sort the array in ascending order by timestamp
@@ -72,6 +72,8 @@ console.log(uploadFileResult.created[0].dataTxId.transactionId)
 let bundledIn=uploadFileResult.created[0].bundledIn.transactionId;
 console.log(bundledIn);
 await postUpload(walletAddress,bundledIn) //posting transanction details to smart contract
+// let contractState=await getContractState();
+// console.log(contractState.uploads);
 //let txDataId=uploadFileResult.created[0].dataTxId
         let txId=uploadFileResult.created[0].dataTxId.transactionId;
         let metadata=[caseId,walletAddress,station,applicant,respodent];
