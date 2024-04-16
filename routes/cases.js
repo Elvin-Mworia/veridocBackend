@@ -106,7 +106,7 @@ router.post("/uploadsubsequentfile",async(req,res)=>{
   let arDrive=setupArdrive();
 
   try{
-    const casefile=await getCases("caseId",caseId)
+    const casefile=await getCases("caseId",caseId) 
     if(casefile.length==0){
       return res.status(400).json({messages:`No such case in the records with case id ${caseId}`})
     }
@@ -118,8 +118,19 @@ router.post("/uploadsubsequentfile",async(req,res)=>{
     let stationInfo=await getStation("name",station);
     const stationId=stationInfo[0].stationId;
     const destFolderId= EID(folder[0].Id)
-    const filePath = path.join(__dirname,'files',walletAddress.concat(".epub"));
-  
+    let file=await getFilename("walletAddress",walletAddress)
+    let youngestObjectFileName;
+    if(file.length>1){
+      let youngestObject=getYoungestObject(file)
+      youngestObjectFileName=youngestObject.fileName;
+    }
+    if(file.length===1){
+      youngestObjectFileName=file[0].fileName
+    }
+    
+  //fetches the name of the unique file
+    const filePath = path.join(__dirname,'files',youngestObjectFileName.concat(".epub"));
+
      // Wrap file for upload
     const wrappedEntity = wrapFileOrFolder(filePath);   
 
@@ -127,12 +138,16 @@ router.post("/uploadsubsequentfile",async(req,res)=>{
 const uploadFileResult = await arDrive.uploadAllEntities({
     entitiesToUpload: [{ wrappedEntity, destFolderId }],
     customMeteData:{
-    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
-    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[applicant], ['respodent']: [respodent],['Content-Type']:['application/pdf']}
+    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station },
+    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['Content-Type']:['application/epob+gzip']}
 }
 });
-console.log(uploadFileResult);
-      let txId=uuid()
+//console.log(uploadFileResult);
+console.log(uploadFileResult.created[0].dataTxId.transactionId)
+// console.log(uploadFileResult.created[0].metadataTxId)
+let bundledIn=uploadFileResult.created[0].bundledIn.transactionId;
+await postUpload(walletAddress,bundledIn) //posting transanction details to smart contract
+    let txId=uploadFileResult.created[0].dataTxId.transactionId;
       let date=String(Date.now());
       let metadata=[casefile[0].walletAddress,date,txId,filetype,caseId];
       //console.log(caseId,txId,metadata,walletAddress,filetype,date,stationId);
@@ -194,13 +209,13 @@ router.post("/getpendingfiles",async (req,res)=>{
       console.log(stationInfo[0].stationId);
       casesOfStation=await getCases("stationId",stationInfo[0].stationId)
       if(casesOfStation.length==0){
-        return res.status(200).json({messages:"Station has no cases"})
+        return res.status(200).json({message:[]})
       }
       //filter out the ones that have status as pending
       let pendingFiles=casesOfStation.filter((file)=>file.status==="pending")
       console.log(pendingFiles);
       if(pendingFiles.length==0){
-        return res.status(200).json({message:'There are currently no pending cases'})
+        return res.status(200).json({message:[]})
       }
       return  res.status(200).json({message:pendingFiles});
     }catch(error){
