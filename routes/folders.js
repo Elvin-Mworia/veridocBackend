@@ -1,37 +1,35 @@
 const express=require("express");
 const router=express.Router();
-const {arDrive}=require("../ardrive/ardrive.js");
+const {setupArdrive}=require("../ardrive/ardrive.js");
 const {addFolder,getStation, getFolder}=require("../weaveDb/weaveDB.js")
+const {  EID } =require('ardrive-core-js');
 
 //takes in name parameter from the req
-router.post("/addFolder",async (req,res,next)=>{
+router.post("/addFolder",async (req,res)=>{
   let name=req.body.name;
-  let parentId=process.env.PARENTID;
-  let id=process.env.FOLDERID;
+  let parentId=process.env.PARENTFOLDERID;
+  let arDrive=setupArdrive();
+  console.log(parentId);
   console.log(name);
-  getStation("name",name).then((result)=>{
-    if(!result.length){
-      res.status(400).json({message:"You can not add a folder which is not a court station"})
-      return
-      }
-      addFolder(id,result[0].name,result[0].stationId,parentId).then(()=>{
-        getFolder(name).then((result)=>{
-          if(result.length==0){
-            res.status(400).json({message:"folder was not created"})
-            return
-          }
-          res.status(200).json({message:"folder created successfully"})
-        }).catch(err=>{
-          console.log(err)
-        })
-       }).catch(err=>{
-        console.log(err)
-      })
-      
-    }).catch(err=>{
-      console.error(err);
-    })
-    next()
+  try {
+    const station= await getStation("name",name);
+      if(!station.length){
+        return res.status(400).json({message:"You can not add a folder which is not a court station"})
+        }
+        const createDriveResult = await arDrive.createPublicFolder({folderName: name,
+        parentFolderId:EID(parentId)});
+        // console.log(createDriveResult)
+        let entityId=createDriveResult.created[0].entityId.entityId
+       await addFolder(entityId,station[0].name,station[0].stationId,parentId);
+       const result= await getFolder(name);
+            if(result.length==0){
+            return res.status(400).json({message:"folder was not created"})
+              }
+       return  res.status(200).json({message:"folder created successfully"})
+  }catch (error) {
+    console.log("Error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+}
   })
 
   
