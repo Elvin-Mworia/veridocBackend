@@ -65,11 +65,11 @@ const stkPush = async (req, res) => {
     })
     .then((data) => {
       console.log(data.data);
-      res.status(200).json(data.data);
+      return res.status(200).json(data.data);
     })
     .catch((err) => {
       console.log(err);
-      res.status(400).json(err.message);
+      return res.status(400).json(err.message);
     });
 };
 
