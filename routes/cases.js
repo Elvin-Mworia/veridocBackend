@@ -9,6 +9,7 @@ const { setTimeout }=require("timers/promises");
 const {deleteFile}=require("./delete.js")
 const { v4: uuid } = require('uuid');
 const {postUpload,getContractState}=require("../contracts/contractApi/postupload.js");
+const {sendmail}=require("./api/mail.js")
 
 function getYoungestObject(data) {
   // 1. Sort the array in ascending order by timestamp
@@ -27,6 +28,7 @@ router.post("/add",async(req,res)=>{
     for (const respodent of req.body.respodent ){
       respodentlist.push(respodent.name);
     }
+    console.log({applicantlist,respodentlist})
     let walletAddress=req.body.walletAddress;
     let station=req.body.station;
     let applicant=applicantlist
@@ -66,16 +68,20 @@ const uploadFileResult = await arDrive.uploadAllEntities({
     metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[...applicant], ['respodent']: [...respodent],['Content-Type']:['application/epub+zip']}
 }
 });
-//console.log(uploadFileResult);
-console.log(uploadFileResult.created[0].dataTxId.transactionId)
+console.log(uploadFileResult);
+console.log("dataTxId:"+uploadFileResult.created[0].dataTxId.transactionId)
+console.log("metadataTxId:"+uploadFileResult.created[0].metadataTxId.transactionId)
 // console.log(uploadFileResult.created[0].metadataTxId)
 let bundledIn=uploadFileResult.created[0].bundledIn.transactionId;
-console.log(bundledIn);
+let txId=uploadFileResult.created[0].dataTxId.transactionId;
+console.log("bundledIn:"+bundledIn);
+//console.log("bundleTxId:"+uploadFileResult.created[1].bundleTxId.transactionId);
 await postUpload(walletAddress,bundledIn) //posting transanction details to smart contract
 // let contractState=await getContractState();
 // console.log(contractState.uploads);
 //let txDataId=uploadFileResult.created[0].dataTxId
-        let txId=uploadFileResult.created[0].dataTxId.transactionId;
+
+        // let txId=uploadFileResult.created[0].dataTxId.transactionId;
         let metadata=[caseId,walletAddress,station,applicant,respodent];
         let date=String(Date.now());
         await addCase(caseId,txId,walletAddress,metadata,applicant,respodent,date,station,stationId);
@@ -170,7 +176,9 @@ await postUpload(walletAddress,bundledIn) //posting transanction details to smar
 
 router.post("/approval",async (req,res)=>{
 let caseId=req.body.caseId;
-let status=req.body.status
+let status=req.body.status;
+let feedback=req.body.feedback;
+console.log({status,feedback});
 
 try{
    let caseFile=await getCases("caseId",caseId);
@@ -183,7 +191,9 @@ try{
    if(caseFile[0].status!==status){
     return res.status(400).json({message:"Failed to update the status of the case"});
    }
-   
+   let user=await getUser(caseFile[0].walletAddress,"users")
+   console.log("user:"+user[0]);
+   await sendmail(status,user[0].email);
    return res.status(200).json({ message: `status of file with case id ${caseId}  updated` });
 }catch(error){
     console.log("Error:", error);
@@ -206,14 +216,14 @@ router.post("/getpendingfiles",async (req,res)=>{
       if (!walletAddresses[0].walletAddresses.includes(walletAddress)) {
         return res.status(401).json({message:"Not authorized"})
       }
-      console.log(stationInfo[0].stationId);
+     // console.log(stationInfo[0].stationId);
       casesOfStation=await getCases("stationId",stationInfo[0].stationId)
       if(casesOfStation.length==0){
         return res.status(200).json({message:[]})
       }
       //filter out the ones that have status as pending
       let pendingFiles=casesOfStation.filter((file)=>file.status==="pending")
-      console.log(pendingFiles);
+     // console.log(pendingFiles);
       if(pendingFiles.length==0){
         return res.status(200).json({message:[]})
       }
