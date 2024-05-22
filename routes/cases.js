@@ -3,12 +3,12 @@ const {setupArdrive}=require("../ardrive/ardrive.js")
 const express=require("express");
 const router=express.Router();
 const {getUser,getStation,returnWalletAddress,checkRole,addCase,getCases,getFolder,approval,subsequentUploads,getSubsequentFile,getFilename,removeFilename}=require("../weaveDb/weaveDB.js")
-const {upload}=require("./uploadFile.js");
+const {upload}=require("../utils/uploadFile.js");
 const path=require("path");
 const { setTimeout }=require("timers/promises");
-const {deleteFile}=require("./delete.js")
+const {deleteFile}=require("../utils/delete.js")
 const { v4: uuid } = require('uuid');
-const {postUpload,getContractState}=require("../contracts/contractApi/postupload.js");
+const {postUpload}=require("../contracts/contractApi/postupload.js");
 const {sendmail}=require("./api/mail.js")
 
 function getYoungestObject(data) {
@@ -57,15 +57,17 @@ router.post("/add",async(req,res)=>{
       console.log(file[0].fileName)//fetches the name of the unique file
       let filePath = path.join(__dirname,'files',youngestObjectFileName.concat(".epub"));
       console.log(filePath)
-       // Wrap file for upload
-      const wrappedEntity = wrapFileOrFolder(filePath);   
-
-// Upload a public file to destination fo  status: 'pending',lder
+  
+// Wrap file for upload
+const wrappedEntity = wrapFileOrFolder(filePath);   
+// Upload a  file 
 const uploadFileResult = await arDrive.uploadAllEntities({
     entitiesToUpload: [{ wrappedEntity, destFolderId }],
     customMetaData:{
-    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,['applicant']:applicant,['respodent']:respodent },
-    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']: [station],['applicant']:[...applicant], ['respodent']: [...respodent],['Content-Type']:['application/epub+zip']}
+    metaDataJson: { ['caseId']:caseId ,['walletAddress']:walletAddress,['station']:station,
+    ['applicant']:applicant,['respodent']:respodent },
+    metaDataGqlTags: {['caseId']: [caseId],['walletAddress']: [walletAddress],['station']:
+     [station],['applicant']:[...applicant], ['respodent']: [...respodent],['Content-Type']:['application/epub+zip']}
 }
 });
 console.log(uploadFileResult);
@@ -75,11 +77,8 @@ console.log("metadataTxId:"+uploadFileResult.created[0].metadataTxId.transaction
 let bundledIn=uploadFileResult.created[0].bundledIn.transactionId;
 let txId=uploadFileResult.created[0].dataTxId.transactionId;
 console.log("bundledIn:"+bundledIn);
-//console.log("bundleTxId:"+uploadFileResult.created[1].bundleTxId.transactionId);
 await postUpload(walletAddress,bundledIn) //posting transanction details to smart contract
-// let contractState=await getContractState();
-// console.log(contractState.uploads);
-//let txDataId=uploadFileResult.created[0].dataTxId
+
 
         // let txId=uploadFileResult.created[0].dataTxId.transactionId;
         let metadata=[caseId,walletAddress,station,applicant,respodent];
@@ -110,13 +109,14 @@ router.post("/uploadsubsequentfile",async(req,res)=>{
   let filetype=req.body.filetype;
   let caseId=req.body.caseId;
   let arDrive=setupArdrive();
-
+console.log(station);
   try{
     const casefile=await getCases("caseId",caseId) 
     if(casefile.length==0){
       return res.status(400).json({messages:`No such case in the records with case id ${caseId}`})
     }
     const folder=await getFolder(station);
+    console.log(folder)
     if(folder.length==0){
       return res.status(404).json({message:"Enter a valid court station"})
     }
@@ -192,7 +192,7 @@ try{
     return res.status(400).json({message:"Failed to update the status of the case"});
    }
    let user=await getUser(caseFile[0].walletAddress,"users")
-   console.log("user:"+user[0]);
+   //console.log("user:"+user[0]);
    await sendmail(status,user[0].email);
    return res.status(200).json({ message: `status of file with case id ${caseId}  updated` });
 }catch(error){
