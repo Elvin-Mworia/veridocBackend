@@ -6,7 +6,7 @@ const courtStation=require("./routes/station");
 const users=require("./routes/user");
 const folder=require("./routes/folders")
 const cases=require("./routes/cases")
-const upload=require("./routes/uploadFile");
+const upload=require("./utils/uploadFile");
 const mpesa=require("./routes/mpesa");
 const transaction=require("./routes/transactions");
 
