@@ -14,10 +14,10 @@ const logger=(req,res,next)=>{
     console.log("incoming request");
     next();
  }
-const Allowed_origin=['*'];
+const Allowed_origin=process.env.ALLOWED_ORIGIN;
  
 const corOption ={
-    origin:'http://localhost:3000', 
+    origin:Allowed_origin, 
     credentials:true,            //access-control-allow-credentials:true
 }
 
