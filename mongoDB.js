@@ -1,30 +1,23 @@
-
+// This file is used to connect to the MongoDB database
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://veridocBackend:sdaPLZYkqZX9TT7M@cluster0.dwyjgew.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
+const client = new MongoClient(process.env.URI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
   }
 });
-
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
+let DB=null;
+async function run(){
+try {
+    // Connect the client to the server	
     await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   }catch(err){
     console.dir(err)
   }
-  finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
 }
+run();
+DB=client.db("Veridoc")
 
-module.exports={run}
+module.exports=DB;
