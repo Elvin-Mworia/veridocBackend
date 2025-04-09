@@ -9,7 +9,6 @@ const cases=require("./routes/cases")
 const upload=require("./utils/uploadFile");
 const mpesa=require("./routes/mpesa");
 const transaction=require("./routes/transactions");
-const mongodb=require("./mongoDB");
 const logger=(req,res,next)=>{
     console.log("incoming request");
     next();
@@ -34,11 +33,7 @@ app.use("/cases",upload,cases);
 app.use("/mpesa-online",mpesa);
 app.use("/transaction",transaction)
 
-mongodb.run().then(()=>{
     app.listen(port,()=>{ 
     console.log(`running on port ${port}`);
 });
-}).catch((err)=>{
-    console.log(err);
-})
 
