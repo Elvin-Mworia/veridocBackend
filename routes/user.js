@@ -185,16 +185,11 @@ router.post('/register',hashingPassword,async (req, res) => {
     try {
       const { firstName, lastName, email, password } = req.body;
       // Check if user already exists
-     // console.log(req.body);
-  
     const collection= await DB.collection("users"); 
     let user = await collection.findOne({ email });
-    console.log(user);
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
-    }
-    
-      
+    }     
        // Create new user
     user = new User({
         firstName,lastName,
