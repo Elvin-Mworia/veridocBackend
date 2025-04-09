@@ -1,7 +1,9 @@
 const express=require("express");
 const router=express.Router();
-const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole,removeAdmin,getAllDocs}=require("../weaveDb/weaveDB.js")
-
+const  User=require("../model/user.js");
+const DB=require("../mongoDB.js");
+const hashingPassword=require("../utils/hashing.js");
+const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole,removeAdmin,getAllDocs}=require("../weaveDb/weaveDB.js");
 //addin a unpriviledged user
 router.post("/l2", async (req, res) => {
     let name = req.body.name;
@@ -128,7 +130,7 @@ router.post("/removeAdmin",async (req,res)=>{
          return res.status(400).json({ message: "Role has not been updated" });
      }
     
-     return res.status(200).json({ message: `User with the wallet address ${walletAddress} has been removed as an admin!` });
+     return res.status(200).json({ message: `￼User with the wallet address ${walletAddress} has been removed as an admin!` });
     }catch (error) {
         console.log("Error:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -177,4 +179,45 @@ router.get("/getAllAdmins",async (req,res)=>{
         return res.status(500).json({ message: "Internal server error" });
     }
 })
+
+// Register a new user and store user data in mongodb
+router.post('/register',hashingPassword,async (req, res) => {
+    try {
+      const { firstName, lastName, email, password } = req.body;
+      // Check if user already exists
+     // console.log(req.body);
+  
+    const collection= await DB.collection("users"); 
+    let user = await collection.findOne({ email });
+    console.log(user);
+    if (user) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+    
+      
+       // Create new user
+    user = new User({
+        firstName,lastName,
+        email,
+        password
+      });
+    let newUser= await collection.insertOne(user);
+      
+      // Remove password from output
+      newUser.password = undefined;
+  
+      res.status(201).json({
+        status: 'success',
+        data: {
+          user: newUser
+        }
+      });
+    } catch (err) {
+      res.status(400).json({
+        status: 'fail',
+        message: err.message
+      });
+    }
+  });
+  
 module.exports=router;
