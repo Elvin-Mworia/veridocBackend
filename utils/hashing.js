@@ -10,7 +10,6 @@ function hashingPassword(req,res,next){
         if (err) {
             return res.status(500).json({ message: "Internal server error" });
         }
-        console.log(hash);
         req.body.password = hash;
         next();
     });
