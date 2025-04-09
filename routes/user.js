@@ -4,6 +4,7 @@ const  User=require("../model/user.js");
 const DB=require("../mongoDB.js");
 const hashingPassword=require("../utils/hashing.js");
 const {addUser,addStaff,addAdmin,getUser,getStation,addWalletAddress,returnWalletAddress,modifyRole,checkRole,removeAdmin,getAllDocs}=require("../weaveDb/weaveDB.js");
+const bcrypt = require('bcryptjs');
 //addin a unpriviledged user
 router.post("/l2", async (req, res) => {
     let name = req.body.name;
@@ -215,4 +216,38 @@ router.post('/register',hashingPassword,async (req, res) => {
     }
   });
   
+  //login user via mongodb
+  router.get("/v2/login", async (req, res) => {
+    try {
+        let user = req.body;
+        if (!user.email || !user.password) {
+            return res.status(400).json({ message: "Please provide email and password" });
+        }
+
+        let collection = await DB.collection("users");
+        let result = await collection.findOne({ email: user.email });
+        if (!result) {
+            return res.status(404).json({ message: "User does not exist" });
+        }
+
+        // Compare the provided password with the stored hash
+        bcrypt.compare(user.password.trim(), result.password, function(err, isMatch) {
+            if (err) {
+                return res.status(500).json({ message: "Internal server error" });
+            }
+            if (isMatch) {
+                user.password = undefined; // Remove password from the response for security
+                return res.status(202).json({ message: "Login successful", user: result });
+            } else {
+                return res.status(401).json({ message: "Incorrect password" });
+            }
+        });
+
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err.message
+        });
+    }
+});
 module.exports=router;
