@@ -217,7 +217,8 @@ router.post('/register',hashingPassword,async (req, res) => {
   });
   
   //login user via mongodb
-  router.get("/v2/login", async (req, res) => {
+  router.post("/v2/login", async (req, res) => {
+    console.log(req.body);
     try {
         let user = req.body;
         if (!user.email || !user.password) {
@@ -236,6 +237,7 @@ router.post('/register',hashingPassword,async (req, res) => {
                 return res.status(500).json({ message: "Internal server error" });
             }
             if (isMatch) {
+                console.log(user);
                 user.password = undefined; // Remove password from the response for security
                 return res.status(202).json({ message: "Login successful", user: result });
             } else {
